@@ -77,8 +77,18 @@ async def _update_ovh(hass, session, domain, user, password, timeout):
     """Update OVH."""
     url = UPDATE_URL
 
-    ip = session.get(IP_URL).text
-    _LOGGER.info("Public IP: {}".format(ip))
+    try:
+        with async_timeout.timeout(timeout):
+            ip_resp = await session.get(IP_URL)
+            ip = await ip_resp.text()
+
+            _LOGGER.info("Public IP: {}".format(ip))
+
+    except aiohttp.ClientError:
+        _LOGGER.warning("Can't connect to ipify API")
+
+    except asyncio.TimeoutError:
+        _LOGGER.warning("Timeout from ipify API")
 
     params = {"myip": ip, "system": "dyndns", "hostname": domain}
 
