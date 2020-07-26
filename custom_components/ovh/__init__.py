@@ -5,6 +5,7 @@ import logging
 
 import aiohttp
 from aiohttp.hdrs import USER_AGENT
+from aiohttp import BasicAuth
 import async_timeout
 import voluptuous as vol
 
@@ -61,6 +62,9 @@ async def async_setup(hass, config):
 
     ip = await _get_public_ip(session, timeout)
 
+    if not ip:
+        return False
+
     result = await _update_ovh(hass, session, domain, ip, user, password, timeout)
 
     if not result:
@@ -104,7 +108,7 @@ async def _update_ovh(hass, session, domain, ip, user, password, timeout):
 
     headers = {USER_AGENT: HA_USER_AGENT}
 
-    authentication = hass.helpers.aiohttp_client.BasicAuth(user, password)
+    authentication = BasicAuth(user, password)
 
     try:
         with async_timeout.timeout(timeout):
