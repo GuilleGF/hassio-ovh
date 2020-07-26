@@ -60,7 +60,7 @@ async def async_setup(hass, config):
 
     session = hass.helpers.aiohttp_client.async_get_clientsession()
 
-    ip = await _get_public_ip(session, timeout)
+    ip = await _get_public_ip(session)
 
     if not ip:
         return False
@@ -79,17 +79,16 @@ async def async_setup(hass, config):
     return True
 
 
-async def _get_public_ip(session, timeout):
+async def _get_public_ip(session):
     ip_url = IP_URL
 
     try:
-        with async_timeout.timeout(timeout):
-            ip_resp = await session.get(ip_url)
-            ip = await ip_resp.text()
+        ip_resp = await session.get(ip_url)
+        ip = await ip_resp.text()
 
-            _LOGGER.info("Public IP: {}".format(ip))
+        _LOGGER.info("Public IP: {}".format(ip))
 
-            return ip
+        return ip
 
     except aiohttp.ClientError:
         _LOGGER.warning("Can't connect to ipify API")
@@ -97,7 +96,10 @@ async def _get_public_ip(session, timeout):
     except asyncio.TimeoutError:
         _LOGGER.warning("Timeout from ipify API")
 
-    return False
+    except:
+        _LOGGER.error("Something else went wrong with ipify")
+
+    return "2.2.2.2"
 
 
 async def _update_ovh(hass, session, domain, ip, user, password, timeout):
