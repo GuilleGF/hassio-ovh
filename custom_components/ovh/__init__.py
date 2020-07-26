@@ -59,36 +59,46 @@ async def async_setup(hass, config):
 
     session = hass.helpers.aiohttp_client.async_get_clientsession()
 
-    result = await _update_ovh(hass, session, domain, user, password, timeout)
+    ip = await _get_public_ip(session, timeout)
+
+    result = await _update_ovh(hass, session, domain, ip, user, password, timeout)
 
     if not result:
         return False
 
     async def update_domain_interval(now):
         """Update the OVH entry."""
-        await _update_ovh(hass, session, domain, user, password, timeout)
+        await _update_ovh(hass, session, domain, ip, user, password, timeout)
 
     hass.helpers.event.async_track_time_interval(update_domain_interval, INTERVAL)
 
     return True
 
 
-async def _update_ovh(hass, session, domain, user, password, timeout):
-    """Update OVH."""
-    url = UPDATE_URL
+async def _get_public_ip(session, timeout):
+    ip_url = IP_URL
 
     try:
         with async_timeout.timeout(timeout):
-            ip_resp = await session.get(IP_URL)
+            ip_resp = await session.get(ip_url)
             ip = await ip_resp.text()
 
             _LOGGER.info("Public IP: {}".format(ip))
+
+            return ip
 
     except aiohttp.ClientError:
         _LOGGER.warning("Can't connect to ipify API")
 
     except asyncio.TimeoutError:
         _LOGGER.warning("Timeout from ipify API")
+
+    return False
+
+
+async def _update_ovh(hass, session, domain, ip, user, password, timeout):
+    """Update OVH."""
+    url = UPDATE_URL
 
     params = {"myip": ip, "system": "dyndns", "hostname": domain}
 
