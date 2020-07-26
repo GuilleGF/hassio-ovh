@@ -65,6 +65,8 @@ async def async_setup(hass, config):
     if not ip:
         return False
 
+    _LOGGER.info("Public IP: {}".format(ip))
+
     result = await _update_ovh(hass, session, domain, ip, user, password, timeout)
 
     if not result:
@@ -85,8 +87,6 @@ async def _get_public_ip(session):
     try:
         ip_resp = await session.get(ip_url)
         ip = await ip_resp.text()
-
-        _LOGGER.info("Public IP: {}".format(ip))
 
         return ip
 
@@ -114,8 +114,8 @@ async def _update_ovh(hass, session, domain, ip, user, password, timeout):
 
     try:
         with async_timeout.timeout(timeout):
-            resp = await session.get(url, params=params, headers=headers, auth=authentication)
-            body = await resp.text()
+            async with session.get(url, params=params, headers=headers, auth=authentication) as resp:
+                body = await resp.text()
 
             if body.startswith("good") or body.startswith("nochg"):
                 return True
