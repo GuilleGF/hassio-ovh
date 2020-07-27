@@ -1,6 +1,6 @@
 {
   "domain": "ovh",
-  "name": "OVH DynDNS",
+  "name": "OVH DynHost",
   "documentation": "https://github.com/GuilleGF/hassio-ovh/blob/master/README.md",
   "codeowners": ["@GuilleGF"]
 }

@@ -1,4 +1,4 @@
-# OVH DynDNS Updater Component for Home Assistant
+# OVH DynHost Updater Component for Home Assistant
 
 With the `ovh` integration you can keep your current IP address in sync with your [OVH DynHost](https://docs.ovh.com/ie/en/domains/hosting_dynhost/)  hostname or domain.  
 
