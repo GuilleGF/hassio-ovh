@@ -1,4 +1,4 @@
 {
-  "domain": "ovh",
-  "name": "OVH DynDNS"
+  "name": "OVH DynDNS",
+  "render_readme": true
 }
