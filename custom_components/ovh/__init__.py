@@ -65,8 +65,6 @@ async def async_setup(hass, config):
     if not ip:
         return False
 
-    _LOGGER.info("Public IP: {}".format(ip))
-
     result = await _update_ovh(hass, session, domain, ip, user, password, timeout)
 
     if not result:
@@ -88,6 +86,8 @@ async def _get_public_ip(session):
         ip_resp = await session.get(ip_url)
         ip = await ip_resp.text()
 
+        _LOGGER.info("Public IP: {}".format(ip))
+
         return ip
 
     except aiohttp.ClientError:
@@ -96,10 +96,7 @@ async def _get_public_ip(session):
     except asyncio.TimeoutError:
         _LOGGER.warning("Timeout from ipify API")
 
-    except:
-        _LOGGER.error("Something else went wrong with ipify")
-
-    return "2.2.2.2"
+    return False
 
 
 async def _update_ovh(hass, session, domain, ip, user, password, timeout):
@@ -117,12 +114,12 @@ async def _update_ovh(hass, session, domain, ip, user, password, timeout):
             async with session.get(url, params=params, headers=headers, auth=authentication) as resp:
                 body = await resp.text()
 
-            if body.startswith("good") or body.startswith("nochg"):
-                return True
+                if body.startswith("good") or body.startswith("nochg"):
+                    return True
 
-            _LOGGER.warning(
-                "Updating OVH failed: %s => %s", domain, OVH_ERRORS[body.strip()]
-            )
+                _LOGGER.warning(
+                    "Updating OVH failed: %s => %s", domain, OVH_ERRORS[body.strip()]
+                )
 
     except aiohttp.ClientError:
         _LOGGER.warning("Can't connect to OVH API")
