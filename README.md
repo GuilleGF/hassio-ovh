@@ -7,9 +7,9 @@ To use the integration in your installation, add the following to your `configur
 #### Configuration variables:
 | Variable |  Required  |  Type  | Description |
 | -------- | ---------- | ----------- | ----------- |
-| `domain` | yes | string |  Your fully qualified domain name (FQDN) |
-| `username` | yes | string | The generated username for this DDNS record |
-| `password` | yes | string | The generated password for this DDNS record |
+| `domain` | yes | string |  The subdomain you are modifying the DNS configuration for |
+| `username` | yes | string | The DynHost username |
+| `password` | yes | string | Password for the DynHost username |
 #### Basic Example:
 
 ```yaml
