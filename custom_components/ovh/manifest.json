@@ -2,5 +2,6 @@
   "domain": "ovh",
   "name": "OVH DynHost",
   "documentation": "https://github.com/GuilleGF/hassio-ovh/blob/master/README.md",
+  "issue_tracker": "https://github.com/GuilleGF/hassio-ovh/issues",
   "codeowners": ["@GuilleGF"]
 }
