@@ -20,3 +20,4 @@ ovh:
   username: YOUR_USERNAME
   password: YOUR_PASSWORD
 ```
+Based on the official [No-IP.com](https://github.com/home-assistant/core/tree/dev/homeassistant/components/no_ip) integration. Thanks to the creators!
