@@ -1,4 +1,5 @@
 {
   "name": "OVH DynHost",
-  "render_readme": true
+  "render_readme": true,
+  "iot_class": "cloud_push"
 }
