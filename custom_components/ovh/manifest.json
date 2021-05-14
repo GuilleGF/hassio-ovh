@@ -4,5 +4,6 @@
   "documentation": "https://github.com/GuilleGF/hassio-ovh/blob/master/README.md",
   "issue_tracker": "https://github.com/GuilleGF/hassio-ovh/issues",
   "codeowners": ["@GuilleGF"],
+  "iot_class": "cloud_polling"
   "version": "1.1.0"
 }
