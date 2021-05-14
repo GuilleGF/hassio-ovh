@@ -4,25 +4,28 @@ from datetime import timedelta
 import logging
 
 import aiohttp
-from aiohttp.hdrs import USER_AGENT
 from aiohttp import BasicAuth
 import async_timeout
 import voluptuous as vol
 
-from homeassistant.const import CONF_DOMAIN, CONF_PASSWORD, CONF_TIMEOUT, CONF_USERNAME
-from homeassistant.helpers.aiohttp_client import SERVER_SOFTWARE
+from homeassistant.const import (
+    CONF_DOMAIN,
+    CONF_PASSWORD,
+    CONF_USERNAME,
+    CONF_SCAN_INTERVAL
+)
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.event import async_track_time_interval
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "ovh"
 
-# We should set a dedicated address for the user agent.
-EMAIL = "hello@home-assistant.io"
+DEFAULT_INTERVAL = timedelta(minutes=10)
 
-INTERVAL = timedelta(minutes=5)
-
-DEFAULT_TIMEOUT = 10
+TIMEOUT = 10
+UPDATE_URL = "https://www.ovh.com/nic/update"
 
 OVH_ERRORS = {
     "nohost": "Hostname supplied does not exist under specified account",
@@ -32,9 +35,6 @@ OVH_ERRORS = {
     "abuse": "Username is blocked due to abuse",
 }
 
-UPDATE_URL = "https://www.ovh.com/nic/update"
-HA_USER_AGENT = f"{SERVER_SOFTWARE} {EMAIL}"
-
 CONFIG_SCHEMA = vol.Schema(
     {
         DOMAIN: vol.Schema(
@@ -42,50 +42,52 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_DOMAIN): cv.string,
                 vol.Required(CONF_USERNAME): cv.string,
                 vol.Required(CONF_PASSWORD): cv.string,
-                vol.Optional(CONF_TIMEOUT, default=DEFAULT_TIMEOUT): cv.positive_int,
+                vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_INTERVAL): vol.All(
+                    cv.time_period, cv.positive_timedelta
+                ),
             }
         )
     },
     extra=vol.ALLOW_EXTRA,
 )
 
-
 async def async_setup(hass, config):
     """Initialize the OVH component."""
-    domain = config[DOMAIN].get(CONF_DOMAIN)
-    user = config[DOMAIN].get(CONF_USERNAME)
-    password = config[DOMAIN].get(CONF_PASSWORD)
-    timeout = config[DOMAIN].get(CONF_TIMEOUT)
+    conf = config[DOMAIN]
+    domain = conf.get(CONF_DOMAIN)
+    user = conf.get(CONF_USERNAME)
+    password = conf.get(CONF_PASSWORD)
+    interval = conf.get(CONF_SCAN_INTERVAL)
 
-    session = hass.helpers.aiohttp_client.async_get_clientsession()
+    session = async_get_clientsession(hass)
 
-    result = await _update_ovh(hass, session, domain, user, password, timeout)
+    result = await _update_ovh(hass, session, domain, user, password)
 
     if not result:
         return False
 
     async def update_domain_interval(now):
         """Update the OVH entry."""
-        await _update_ovh(hass, session, domain, user, password, timeout)
+        await _update_ovh(hass, session, domain, user, password)
 
-    hass.helpers.event.async_track_time_interval(update_domain_interval, INTERVAL)
+    async_track_time_interval(hass, update_domain_interval, interval)
 
     return True
 
 
-async def _update_ovh(hass, session, domain, user, password, timeout):
+async def _update_ovh(hass, session, domain, user, password):
     """Update OVH."""
-    url = UPDATE_URL
     params = {"system": "dyndns", "hostname": domain}
-    headers = {USER_AGENT: HA_USER_AGENT}
     authentication = BasicAuth(user, password)
 
     try:
-        with async_timeout.timeout(timeout):
-            resp = await session.get(url, params=params, headers=headers, auth=authentication)
+        with async_timeout.timeout(TIMEOUT):
+            resp = await session.get(UPDATE_URL, params=params, auth=authentication)
             body = await resp.text()
 
             if body.startswith("good") or body.startswith("nochg"):
+                _LOGGER.info("Updating OVH for domain: %s", domain)
+
                 return True
 
             _LOGGER.warning("Updating OVH failed: %s => %s", domain, OVH_ERRORS[body.strip()])
