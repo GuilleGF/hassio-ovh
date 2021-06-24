@@ -23,6 +23,7 @@ ovh:
   password: YOUR_PASSWORD
 ```
 
+#### Example with two domains and scan interval:
 Suports multiple subdomains separated by a comma if they all use the same DynHost username and password.
 ```yaml
 ovh:
