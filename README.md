@@ -9,7 +9,7 @@ To use the integration in your installation, add the following to your `configur
 #### Configuration variables:
 | Variable |  Required  |  Type  | Description |
 | -------- | ---------- | ----------- | ----------- |
-| `domain` | yes | string |  The subdomain you are modifying the DNS configuration for |
+| `domain` | yes | string |  The subdomain/subdomains you are modifying the DNS configuration for |
 | `username` | yes | string | The DynHost username |
 | `password` | yes | string | Password for the DynHost username |
 | `scan_interval` | no |  time | How often to call the update service. (default: 10 minutes) |
@@ -19,6 +19,14 @@ To use the integration in your installation, add the following to your `configur
 ```yaml
 ovh:
   domain: subdomain.domain.com
+  username: YOUR_USERNAME
+  password: YOUR_PASSWORD
+```
+
+Suports multiple subdomains separated by a comma if they all use the same DynHost username and password.
+```yaml
+ovh:
+  domain: "subdomain1.domain.com,subdomain2.domain.com"
   username: YOUR_USERNAME
   password: YOUR_PASSWORD
 ```

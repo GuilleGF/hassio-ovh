@@ -54,21 +54,23 @@ CONFIG_SCHEMA = vol.Schema(
 async def async_setup(hass, config):
     """Initialize the OVH component."""
     conf = config[DOMAIN]
-    domain = conf.get(CONF_DOMAIN)
+    domains = conf.get(CONF_DOMAIN)
     user = conf.get(CONF_USERNAME)
     password = conf.get(CONF_PASSWORD)
     interval = conf.get(CONF_SCAN_INTERVAL)
+    domains_list = domains.split(",")
 
     session = async_get_clientsession(hass)
 
-    result = await _update_ovh(hass, session, domain, user, password)
-
-    if not result:
-        return False
+    for domain in domains_list:
+        result = await _update_ovh(hass, session, domain, user, password)
+        if not result:
+            return False
 
     async def update_domain_interval(now):
         """Update the OVH entry."""
-        await _update_ovh(hass, session, domain, user, password)
+        for domain in domains_list:
+            await _update_ovh(hass, session, domain, user, password)
 
     async_track_time_interval(hass, update_domain_interval, interval)
 
