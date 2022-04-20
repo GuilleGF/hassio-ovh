@@ -24,7 +24,7 @@ DOMAIN = "ovh"
 
 DEFAULT_INTERVAL = timedelta(minutes=10)
 
-TIMEOUT = 10
+TIMEOUT = 30
 UPDATE_URL = "https://www.ovh.com/nic/update"
 
 OVH_ERRORS = {
@@ -81,7 +81,7 @@ async def _update_ovh(hass, session, domain, user, password):
     authentication = BasicAuth(user, password)
 
     try:
-        with async_timeout.timeout(TIMEOUT):
+        async with async_timeout.timeout(TIMEOUT):
             resp = await session.get(UPDATE_URL, params=params, auth=authentication)
             body = await resp.text()
 
