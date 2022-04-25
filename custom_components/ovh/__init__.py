@@ -4,7 +4,6 @@ from datetime import timedelta
 import logging
 
 import aiohttp
-from aiohttp import BasicAuth
 import async_timeout
 import voluptuous as vol
 
@@ -14,18 +13,20 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_SCAN_INTERVAL
 )
+from homeassistant.core import HomeAssistant
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.typing import ConfigType
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "ovh"
 
-DEFAULT_INTERVAL = timedelta(minutes=10)
+DEFAULT_INTERVAL = timedelta(minutes=15)
 
 TIMEOUT = 30
-UPDATE_URL = "https://www.ovh.com/nic/update"
+HOST = "www.ovh.com/nic/update"
 
 OVH_ERRORS = {
     "nohost": "Hostname supplied does not exist under specified account",
@@ -51,38 +52,37 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-async def async_setup(hass, config):
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Initialize the OVH component."""
     conf = config[DOMAIN]
-    domain = conf.get(CONF_DOMAIN)
-    user = conf.get(CONF_USERNAME)
-    password = conf.get(CONF_PASSWORD)
+    domain = conf.get(CONF_DOMAIN).strip()
+    user = conf.get(CONF_USERNAME).strip()
+    password = conf.get(CONF_PASSWORD).strip()
     interval = conf.get(CONF_SCAN_INTERVAL)
 
     session = async_get_clientsession(hass)
 
-    result = await _update_ovh(hass, session, domain, user, password)
+    result = await _update_ovh(session, domain, user, password)
 
     if not result:
         return False
 
     async def update_domain_interval(now):
         """Update the OVH entry."""
-        await _update_ovh(hass, session, domain, user, password)
+        await _update_ovh(session, domain, user, password)
 
     async_track_time_interval(hass, update_domain_interval, interval)
 
     return True
 
 
-async def _update_ovh(hass, session, domain, user, password):
+async def _update_ovh(session, domain, user, password):
     """Update OVH."""
-    params = {"system": "dyndns", "hostname": domain}
-    authentication = BasicAuth(user, password)
-
     try:
+        url = f"https://{user}:{password}@{HOST}?system=dyndns&hostname={domain}"
         async with async_timeout.timeout(TIMEOUT):
-            resp = await session.get(UPDATE_URL, params=params, auth=authentication)
+            resp = await session.get(url)
             body = await resp.text()
 
             if body.startswith("good") or body.startswith("nochg"):
