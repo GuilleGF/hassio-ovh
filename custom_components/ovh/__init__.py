@@ -56,9 +56,9 @@ CONFIG_SCHEMA = vol.Schema(
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Initialize the OVH component."""
     conf = config[DOMAIN]
-    domain = conf.get(CONF_DOMAIN)
-    user = conf.get(CONF_USERNAME)
-    password = conf.get(CONF_PASSWORD)
+    domain = conf.get(CONF_DOMAIN).strip()
+    user = conf.get(CONF_USERNAME).strip()
+    password = conf.get(CONF_PASSWORD).strip()
     interval = conf.get(CONF_SCAN_INTERVAL)
 
     session = async_get_clientsession(hass)
