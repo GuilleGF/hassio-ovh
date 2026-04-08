@@ -16,6 +16,7 @@ The configuration accepts a list of entries, so you can manage multiple DynHost 
 | `domain` | yes | string | The subdomain you are updating the DNS configuration for |
 | `username` | yes | string | The DynHost username |
 | `password` | yes | string | Password for the DynHost username |
+| `ipv6` | no | boolean | Use IPv6 address instead of IPv4 to update the DNS record. (default: false) |
 | `scan_interval` | no | time | How often to call the update service. (default: 15 minutes) |
 
 #### Example:
@@ -30,5 +31,6 @@ ovh:
     username: OTHER_USERNAME
     password: OTHER_PASSWORD
     scan_interval: 00:30:00
+    ipv6: true
 ```
 Based on the official [No-IP.com](https://github.com/home-assistant/core/tree/dev/homeassistant/components/no_ip) and [Mythic Beasts](https://github.com/home-assistant/core/blob/dev/homeassistant/components/mythicbeastsdns) integrations. Thanks to the creators!
