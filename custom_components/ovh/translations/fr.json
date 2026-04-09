@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "OVH DynHost",
+        "description": "Entrez vos identifiants OVH DynHost",
+        "data": {
+          "domain": "Domaine",
+          "username": "Nom d'utilisateur",
+          "password": "Mot de passe",
+          "ipv6": "Utiliser IPv6"
+        },
+        "data_description": {
+          "domain": "Le nom d'hôte complet à mettre à jour (ex. sub.exemple.com)",
+          "username": "Votre identifiant DynHost",
+          "password": "Votre mot de passe DynHost"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Ce domaine est déjà configuré"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options OVH DynHost",
+        "data": {
+          "ipv6": "Utiliser IPv6",
+          "scan_interval": "Intervalle de mise à jour (secondes)"
+        }
+      }
+    }
+  }
+}

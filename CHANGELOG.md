@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.1.0] - 2026-04-09
+
+### Added
+
+- UI configuration flow: integration can now be set up from **Settings → Devices & Services** without editing YAML
+- Support for multiple domains via repeated "Add integration" — each entry is managed independently
+- Options flow to edit `ipv6` and `scan_interval` after initial setup without recreating the entry
+- Translations for English (`en`), Spanish (`es`), and French (`fr`)
+- `const.py` module to centralise shared constants
+
+### Changed
+
+- YAML configuration is now imported automatically as UI config entries on first startup — no manual migration needed
+- `scan_interval` is stored in seconds (integer) in the options flow; YAML `time_period` values are converted automatically on import
+- Manifest version bumped to `3.1.0`; added `config_flow: true` and `integration_type: service`
+
+---
+
 ## [3.0.0] - 2026-04-09
 
 ### Breaking changes

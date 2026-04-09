@@ -7,6 +7,7 @@ import aiohttp
 import async_timeout
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
+from homeassistant.config_entries import SOURCE_IMPORT, ConfigEntry
 from homeassistant.const import (
     CONF_DOMAIN,
     CONF_PASSWORD,
@@ -18,25 +19,18 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 
+from .const import (
+    CONF_IPV6,
+    DEFAULT_INTERVAL,
+    DOMAIN,
+    HOST,
+    IP_RESOLVER_V4,
+    IP_RESOLVER_V6,
+    OVH_ERRORS,
+    TIMEOUT,
+)
+
 _LOGGER = logging.getLogger(__name__)
-
-DOMAIN = "ovh"
-CONF_IPV6 = "ipv6"
-
-DEFAULT_INTERVAL = timedelta(minutes=15)
-
-TIMEOUT = 30
-HOST = "dns.eu.ovhapis.com/nic/update"
-IP_RESOLVER_V4 = "https://api4.ipify.org"
-IP_RESOLVER_V6 = "https://api6.ipify.org"
-
-OVH_ERRORS = {
-    "nohost": "Hostname supplied does not exist under specified account",
-    "badauth": "Invalid username password combination",
-    "badagent": "Client disabled",
-    "!donator": "An update request was sent with a feature that is not available",
-    "abuse": "Username is blocked due to abuse",
-}
 
 ENTRY_SCHEMA = vol.Schema(
     {
@@ -59,27 +53,62 @@ CONFIG_SCHEMA = vol.Schema(
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Initialize the OVH component."""
-    session = async_get_clientsession(hass)
+    """Initialize the OVH component from YAML (imports entries for UI management)."""
+    if DOMAIN not in config:
+        return True
 
-    for entry in config[DOMAIN]:
-        domain = entry[CONF_DOMAIN].strip()
-        user = entry[CONF_USERNAME].strip()
-        password = entry[CONF_PASSWORD].strip()
-        ipv6 = entry[CONF_IPV6]
-        interval = entry[CONF_SCAN_INTERVAL]
-
-        await _update_ovh(session, domain, user, password, ipv6=ipv6)
-
-        async def update_domain_interval(
-            now, _domain=domain, _user=user, _password=password, _ipv6=ipv6
-        ):
-            """Update the OVH entry."""
-            await _update_ovh(session, _domain, _user, _password, ipv6=_ipv6)
-
-        async_track_time_interval(hass, update_domain_interval, interval)
+    for entry_cfg in config[DOMAIN]:
+        hass.async_create_task(
+            hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": SOURCE_IMPORT},
+                data=entry_cfg,
+            )
+        )
 
     return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up OVH DynHost from a config entry."""
+    session = async_get_clientsession(hass)
+
+    domain = entry.data[CONF_DOMAIN].strip()
+    user = entry.data[CONF_USERNAME].strip()
+    password = entry.data[CONF_PASSWORD].strip()
+    ipv6 = entry.options.get(CONF_IPV6, entry.data.get(CONF_IPV6, False))
+    raw_interval = entry.options.get(
+        CONF_SCAN_INTERVAL, int(DEFAULT_INTERVAL.total_seconds())
+    )
+    interval = timedelta(seconds=raw_interval)
+
+    await _update_ovh(session, domain, user, password, ipv6=ipv6)
+
+    async def update_domain_interval(
+        now, _domain=domain, _user=user, _password=password, _ipv6=ipv6
+    ):
+        """Update the OVH entry."""
+        await _update_ovh(session, _domain, _user, _password, ipv6=_ipv6)
+
+    unsub = async_track_time_interval(hass, update_domain_interval, interval)
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = unsub
+
+    entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
+
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry and cancel the periodic update."""
+    unsub = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+    if unsub is not None:
+        unsub()
+    return True
+
+
+async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload entry when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def _get_external_ip(session, *, ipv6: bool = False):
