@@ -20,4 +20,10 @@ ignore = [
 max-complexity = 25
 
 [lint.per-file-ignores]
-"tests/*" = ["S101"]  # assert allowed in tests
+"tests/*" = [
+    "S101",    # assert allowed in tests
+    "D102",    # docstrings in test methods are noise
+    "D104",    # docstring in tests/__init__.py not needed
+    "PLR2004", # magic values are fine in test assertions
+    "E501",    # long lines are fine in test data
+]

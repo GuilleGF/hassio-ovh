@@ -1,8 +1,8 @@
 """Tests for _get_external_ip and _update_ovh functions."""
 
-import aiohttp
-import pytest
 from unittest.mock import AsyncMock
+
+import aiohttp
 
 from custom_components.ovh import (
     IP_RESOLVER_V4,

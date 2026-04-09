@@ -1,7 +1,8 @@
 """Shared fixtures for OVH tests."""
 
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
 
 
 @pytest.fixture
