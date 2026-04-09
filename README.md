@@ -8,7 +8,7 @@ With the `ovh` integration you can keep your current IP address in sync with you
 
 To use the integration in your installation, add the following to your `configuration.yaml` file:
 
-The configuration accepts a list of entries, so you can manage multiple DynHost records with different credentials independently.
+The configuration accepts a list of entries, so you can manage multiple DynHost records with different credentials independently. Single entry format (without `-`) is also supported for backwards compatibility.
 
 #### Configuration variables:
 | Variable |  Required  |  Type  | Description |

@@ -52,7 +52,7 @@ ENTRY_SCHEMA = vol.Schema(
 
 CONFIG_SCHEMA = vol.Schema(
     {
-        DOMAIN: [ENTRY_SCHEMA],
+        DOMAIN: vol.All(cv.ensure_list, [ENTRY_SCHEMA]),
     },
     extra=vol.ALLOW_EXTRA,
 )

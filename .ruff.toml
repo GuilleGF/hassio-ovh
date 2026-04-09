@@ -18,3 +18,6 @@ ignore = [
 
 [lint.mccabe]
 max-complexity = 25
+
+[lint.per-file-ignores]
+"tests/*" = ["S101"]  # assert allowed in tests
