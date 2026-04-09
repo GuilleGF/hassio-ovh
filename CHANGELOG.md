@@ -1,0 +1,52 @@
+# Changelog
+
+## [3.0.0] - 2026-04-09
+
+### Breaking changes
+
+- Configuration format changed to list-based entries. Single entry format (without `-`) is still supported for backwards compatibility.
+
+  **New format:**
+  ```yaml
+  ovh:
+    - domain: subdomain.domain.com
+      username: YOUR_USERNAME
+      password: YOUR_PASSWORD
+  ```
+
+  **Old format (still works):**
+  ```yaml
+  ovh:
+    domain: subdomain.domain.com
+    username: YOUR_USERNAME
+    password: YOUR_PASSWORD
+  ```
+
+### Added
+
+- Support for multiple DynHost entries with independent credentials
+- IPv6 support via optional `ipv6: true` config flag (uses `api6.ipify.org` to resolve the public IPv6 address)
+- External public IP resolution via [ipify.org](https://www.ipify.org) before each update
+- Graceful error handling when IP resolution fails (skips update and logs a warning)
+- Unit tests covering config schema validation and all integration functions
+
+### Changed
+
+- `myip` parameter is now explicitly sent to the OVH API with the resolved public IP
+- Manifest version bumped to `3.0.0`
+- CI workflows modernized: pinned action SHAs, merged hassfest + HACS into a single validate workflow, added Ruff linter and formatter
+
+---
+
+## [2.0.0] - 2023-xx-xx
+
+### Changed
+
+- Removed HTTP basic auth from OVH API requests
+- Trim whitespace from `domain`, `username`, and `password` config values
+
+---
+
+## [1.x]
+
+- Initial releases with single-host DynHost support, configurable scan interval, and timeout handling
