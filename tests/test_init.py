@@ -124,7 +124,9 @@ class TestUpdateOvh:
         assert "hostname=host.ovh.net" in ovh_url
 
     async def test_uses_ipv6_resolver_when_flag_set(self, mock_session):
-        self._setup_responses(mock_session, ip="2001:db8::1", ovh_body="good 2001:db8::1")
+        self._setup_responses(
+            mock_session, ip="2001:db8::1", ovh_body="good 2001:db8::1"
+        )
 
         await _update_ovh(mock_session, "host.ovh.net", "user", "pass", ipv6=True)
 

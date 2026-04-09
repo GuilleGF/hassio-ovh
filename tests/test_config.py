@@ -58,19 +58,30 @@ class TestConfigSchema:
             CONFIG_SCHEMA({DOMAIN: [{"domain": "host.ovh.net", "username": "u"}]})
 
     def test_ipv6_defaults_to_false(self):
-        config = {DOMAIN: [{"domain": "host.ovh.net", "username": "u", "password": "p"}]}
+        config = {
+            DOMAIN: [{"domain": "host.ovh.net", "username": "u", "password": "p"}]
+        }
         result = CONFIG_SCHEMA(config)
         assert result[DOMAIN][0]["ipv6"] is False
 
     def test_ipv6_can_be_enabled(self):
         config = {
-            DOMAIN: [{"domain": "host.ovh.net", "username": "u", "password": "p", "ipv6": True}]
+            DOMAIN: [
+                {
+                    "domain": "host.ovh.net",
+                    "username": "u",
+                    "password": "p",
+                    "ipv6": True,
+                }
+            ]
         }
         result = CONFIG_SCHEMA(config)
         assert result[DOMAIN][0]["ipv6"] is True
 
     def test_scan_interval_defaults_to_15_minutes(self):
-        config = {DOMAIN: [{"domain": "host.ovh.net", "username": "u", "password": "p"}]}
+        config = {
+            DOMAIN: [{"domain": "host.ovh.net", "username": "u", "password": "p"}]
+        }
         result = CONFIG_SCHEMA(config)
         assert result[DOMAIN][0]["scan_interval"] == timedelta(minutes=15)
 
