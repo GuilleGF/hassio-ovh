@@ -2,8 +2,10 @@
   "domain": "ovh",
   "name": "OVH DynHost",
   "codeowners": ["@GuilleGF"],
+  "config_flow": true,
   "documentation": "https://github.com/GuilleGF/hassio-ovh/blob/master/README.md",
+  "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/GuilleGF/hassio-ovh/issues",
-  "version": "3.0.0"
+  "version": "3.1.0"
 }

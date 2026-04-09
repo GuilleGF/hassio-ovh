@@ -26,4 +26,6 @@ max-complexity = 25
     "D104",    # docstring in tests/__init__.py not needed
     "PLR2004", # magic values are fine in test assertions
     "E501",    # long lines are fine in test data
+    "SLF001",  # accessing private HA methods (_abort_if_unique_id_configured) is standard in tests
+    "PLC0415", # top-level imports not always practical in parameterized test cases
 ]
